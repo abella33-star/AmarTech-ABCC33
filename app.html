@@ -976,7 +976,7 @@ async function analyzeDiag(event) {
       result.innerHTML='<div style="display:flex;align-items:center;gap:8px;color:var(--muted2)"><div class="dots"><span></span><span></span><span></span></div>&nbsp; Analyse GPT-4o Vision en cours...</div>';
     }
     try {
-      const key = settings.apiKey || OPENAI_KEY;
+      const key = (settings && settings.apiKey) ? settings.apiKey : OPENAI_KEY;
       const r = await fetch('https://api.openai.com/v1/chat/completions', {
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
@@ -1064,7 +1064,7 @@ async function calcPR() {
   if(!inp) { toast("Décris l'installation",'warn'); return; }
   toast('Calcul avec tes remises...','ok');
   try {
-    const key = settings.apiKey || OPENAI_KEY;
+    const key = (settings && settings.apiKey) ? settings.apiKey : OPENAI_KEY;
     const prompt = `Expert chiffrage plomberie-chauffage, région Bordeaux (2026).
 Prestation: ${inp}
 Remises SIDV: cuivre ${remises.sidv.cuivre}%, sertir ${remises.sidv.sertir}%, chauffage ${remises.sidv.chauffage}%, robinetterie ${remises.sidv.robinetterie}%
