@@ -1,31 +1,25 @@
 /**
- * AmarTech Service Worker v2
- * Stratégie: Network First pour API, Cache First pour assets
+ * AmarTech Service Worker v2.1
+ * Fix Safari: ne jamais intercepter les navigations document (redirections)
  */
-const CACHE_NAME = 'amartech-v2.0';
+const CACHE_NAME = 'amartech-v2.1';
 const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './app.html',
-  './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap'
+  './manifest.json'
 ];
 
-// Installation — mise en cache des assets statiques
+// Installation
 self.addEventListener('install', event => {
-  console.log('[SW] Installing AmarTech v2...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS.filter(u => !u.startsWith('http'))))
+      .then(cache => cache.addAll(STATIC_ASSETS))
       .then(() => self.skipWaiting())
   );
 });
 
 // Activation — nettoyage anciens caches
 self.addEventListener('activate', event => {
-  console.log('[SW] Activating AmarTech v2...');
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
@@ -38,14 +32,19 @@ self.addEventListener('activate', event => {
 // Interception des requêtes
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  
-  // API calls — Network only (jamais en cache)
+
+  // IMPORTANT: ne jamais intercepter les navigations document (fix Safari redirects)
+  if (event.request.mode === 'navigate') {
+    return; // laisse le browser gérer nativement
+  }
+
+  // API calls — Network only
   const isApiCall = ['api.openai.com', 'api.anthropic.com', 'api.elevenlabs.io'].some(d => url.hostname.includes(d));
   if (isApiCall) {
     event.respondWith(fetch(event.request));
     return;
   }
-  
+
   // Fonts Google — Cache first
   if (url.hostname.includes('fonts.')) {
     event.respondWith(
@@ -56,34 +55,23 @@ self.addEventListener('fetch', event => {
     );
     return;
   }
-  
-  // Assets locaux — Cache first with network fallback
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(resp => {
-        if (resp.status === 200) {
-          caches.open(CACHE_NAME).then(c => c.put(event.request, resp.clone()));
-        }
-        return resp;
-      }).catch(() => {
-        // Offline fallback
-        if (event.request.destination === 'document') {
-          return caches.match('./app.html');
-        }
-      });
-    })
-  );
-});
 
-// Push notifications (futur)
-self.addEventListener('push', event => {
-  if (!event.data) return;
-  const data = event.data.json();
-  self.registration.showNotification(data.title, {
-    body: data.body,
-    icon: './icon-192.png',
-    badge: './icon-192.png',
-    tag: 'amartech-notif'
-  });
+  // Icônes et manifest — Cache first
+  if (url.pathname.match(/\.(png|json)$/)) {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        if (cached) return cached;
+        return fetch(event.request).then(resp => {
+          if (resp.status === 200) {
+            caches.open(CACHE_NAME).then(c => c.put(event.request, resp.clone()));
+          }
+          return resp;
+        });
+      })
+    );
+    return;
+  }
+
+  // Tout le reste — network direct
+  event.respondWith(fetch(event.request));
 });
