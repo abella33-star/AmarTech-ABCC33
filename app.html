@@ -654,10 +654,12 @@ async function sendChat(){
   area.scrollTop=area.scrollHeight;
 }
 
+function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function addMsg(text,type){
   const area=document.getElementById('chatArea');
   const ai=type==='ai';
-  area.innerHTML+=`<div class="msg msg-${ai?'ai':'user'}"><div class="av">${ai?'🤖':'👤'}</div><div class="bubble">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')}</div></div>`;
+  const safe=escHtml(text).replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
+  area.innerHTML+=`<div class="msg msg-${ai?'ai':'user'}"><div class="av">${ai?'🤖':'👤'}</div><div class="bubble">${safe}</div></div>`;
   area.scrollTop=area.scrollHeight;
 }
 function qa(q){document.getElementById('chatInput').value=q;sendChat();}
@@ -948,8 +950,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   const h=new Date().getHours();const g=h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir';
   const nom=settings.name||'Amar';
   const pt=document.querySelector('#p-chat .ptitle');
-  if(pt)pt.innerHTML=`${g} <span id="greetName">${nom}</span> 👋`;
+  if(pt){pt.innerHTML=`${g} <span id="greetName"></span> 👋`;document.getElementById('greetName').textContent=nom;}
 
+  renderStock();renderFournisseurs();
   addLigne();addLigne();addLigne();
 
   if(!settings.apiKey)setTimeout(()=>toast('Ouvre ⚙️ pour ajouter ta clé API IA','warn'),1800);
