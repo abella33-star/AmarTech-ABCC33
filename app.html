@@ -501,7 +501,7 @@ function saveSettings(){
   settings={
     name:document.getElementById('sName')?.value||settings.name||'Amar',
     apiKey:document.getElementById('sApiKey')?.value||settings.apiKey||'',
-    apiType:document.getElementById('sApiType')?.value||settings.apiType||'claude'
+    apiType:document.getElementById('sApiType')?.value||settings.apiType||'openai'
   };
   localStorage.setItem('at_settings',JSON.stringify(settings));
   const g=document.getElementById('greetName');
@@ -534,13 +534,13 @@ function fillSettings(){
 // ═══════════════════════ AI ═══════════════════════
 async function callAI(messages,maxTokens=700,sysOverride=null){
   const key=settings.apiKey;
-  if(!key){toast('Clé API manquante — ouvre ⚙️','err');throw new Error('no key');}
   const sys=sysOverride||buildSys();
-  if(settings.apiType==='openai'){
-    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',max_tokens:maxTokens,messages:[{role:'system',content:sys},...messages]})});
+  if((settings.apiType||'openai')==='openai'){
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-4o',max_tokens:maxTokens,messages:[{role:'system',content:sys},...messages]})});
     if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Err');}
     return (await r.json()).choices[0].message.content;
   }
+  if(!key){toast('Clé API manquante — ouvre ⚙️','err');throw new Error('no key');}
   const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-opus-4-6',max_tokens:maxTokens,system:sys,messages})});
   if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Err');}
   return (await r.json()).content[0].text;
@@ -563,11 +563,9 @@ async function sendChatPhoto(e){
     area.scrollTop=area.scrollHeight;
     try{
       let resp;
-      if(settings.apiType==='openai'){
-        const key=settings.apiKey;
-        if(!key){toast('Clé API manquante — ouvre ⚙️','err');btn.disabled=false;return;}
+      if((settings.apiType||'openai')==='openai'){
         const sys=buildSys();
-        const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',max_tokens:1000,messages:[{role:'system',content:sys},{role:'user',content:[{type:'image_url',image_url:{url:`data:${mime};base64,${b64}`}},{type:'text',text:caption}]}]})});
+        const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-4o',max_tokens:1000,messages:[{role:'system',content:sys},{role:'user',content:[{type:'image_url',image_url:{url:`data:${mime};base64,${b64}`}},{type:'text',text:caption}]}]})});
         if(!r.ok){const er=await r.json();throw new Error(er.error?.message||'Err');}
         resp=(await r.json()).choices[0].message.content;
       } else {
