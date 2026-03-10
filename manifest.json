@@ -1,0 +1,48 @@
+{
+  "name": "AmarTech ABCC33",
+  "short_name": "AmarTech",
+  "description": "Assistant IA Plomberie-Chauffage \u2014 ABCC33",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0c10",
+  "theme_color": "#0a0c10",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "lang": "fr",
+  "categories": [
+    "business",
+    "utilities",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Assistant IA",
+      "url": "./app.html",
+      "description": "Ouvrir l'assistant"
+    },
+    {
+      "name": "Stock Camion",
+      "url": "./app.html#stock",
+      "description": "Voir le stock"
+    },
+    {
+      "name": "Nouveau Devis",
+      "url": "./app.html#devis",
+      "description": "Cr\u00e9er un devis"
+    }
+  ]
+}

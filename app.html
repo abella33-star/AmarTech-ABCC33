@@ -7,6 +7,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0c10">
 <title>AmarTech — Assistant Plomberie IA</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AmarTech">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0a0c10;--s1:#0f1218;--s2:#151a22;--s3:#1c2230;--border:rgba(255,255,255,0.07);--bord2:rgba(255,255,255,0.14);--blue:#3b82f6;--blue2:#60a5fa;--orange:#f97316;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--copper:#b87333;--text:#e2e8f0;--muted:#64748b;--muted2:#94a3b8;--sans:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace;--r:10px;--r2:16px;}
@@ -175,6 +181,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .terr{border-color:rgba(239,68,68,.35);}
 .twarn{border-color:rgba(234,179,8,.35);}
 @media(max-width:380px){.mgrille{grid-template-columns:1fr;}.g2{grid-template-columns:1fr;}.ligne{grid-template-columns:1fr 48px 60px 24px;}}
+
+/* ── V2 ADDITIONS ── */
+.ri{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;width:68px;text-align:center;transition:border-color 0.2s;-webkit-appearance:none;}
+.ri:focus{border-color:rgba(59,130,246,0.4);}
+.shead{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;}
+.stitle{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.badge{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;padding:3px 9px;border-radius:20px;}
+.bb{background:rgba(59,130,246,0.12);color:var(--blue2);border:1px solid rgba(59,130,246,0.18);}
+.bg{background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.18);}
+.bo{background:rgba(249,115,22,0.1);color:var(--orange);border:1px solid rgba(249,115,22,0.18);}
+.br{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.18);}
+.by{background:rgba(234,179,8,0.1);color:var(--yellow);border:1px solid rgba(234,179,8,0.18);}
+.dta{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;resize:vertical;min-height:70px;transition:border-color 0.2s;-webkit-appearance:none;}
+.dta:focus{border-color:rgba(59,130,246,0.4);}
+.dta::placeholder{color:var(--muted);}
 </style>
 </head>
 <body>
@@ -253,6 +274,35 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   </div>
   <div class="slist" id="stockList"></div>
   <button class="add-stock" onclick="openAdd()">+ AJOUTER UN ARTICLE AU STOCK</button>
+</div>
+
+
+<!-- PAGE DIAGNOSTIC -->
+<div class="page" id="p-diag">
+  <div class="ptitle">Diagnostic <span>Photo</span></div>
+  <div class="psub">// GPT-4o VISION · IDENTIFICATION INSTANTANÉE</div>
+  <div class="card">
+    <div class="stitle" style="margin-bottom:11px">📷 Photo ou galerie</div>
+    <div id="photoZone" onclick="document.getElementById('diagPhoto').click()" style="border:2px dashed rgba(59,130,246,0.28);border-radius:14px;padding:28px 16px;text-align:center;cursor:pointer;background:rgba(59,130,246,0.03);transition:all 0.2s;">
+      <input type="file" id="diagPhoto" accept="image/*" capture="environment" style="display:none" onchange="analyzeDiag(event)">
+      <div id="photoTip"><div style="font-size:42px;margin-bottom:10px">📸</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted2);letter-spacing:0.12em">TOUCHER POUR PHOTOGRAPHIER</div><div style="font-size:12px;color:var(--muted2);margin-top:8px;line-height:1.6">Fuite · Raccord · Tuyau · Ballon · Chaudière · Tableau</div></div>
+      <img id="diagPreview" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;display:none;margin-top:10px;">
+    </div>
+    <div id="diagResult" style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:14px;margin-top:12px;font-size:13px;line-height:1.75;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-b" style="flex:1;justify-content:center" onclick="document.getElementById('diagPhoto').click()">📷 Nouvelle photo</button>
+      <button class="btn btn-g" style="flex:1;justify-content:center" id="diagAskBtn" onclick="askAboutDiag()" disabled>💬 Question IA</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="stitle" style="margin-bottom:11px">💡 Cas d'usage</div>
+    <div style="font-size:12px;color:var(--muted2);line-height:1.8">
+      <div style="padding:8px 0;border-bottom:1px solid var(--border)">🔍 <b style="color:var(--text)">Fuite ou casse</b> → diagnostic + liste pièces + procédure</div>
+      <div style="padding:8px 0;border-bottom:1px solid var(--border)">🔩 <b style="color:var(--text)">Raccord inconnu</b> → référence + diamètre + prix SIDV</div>
+      <div style="padding:8px 0;border-bottom:1px solid var(--border)">🧾 <b style="color:var(--text)">Facture SIDV</b> → extraction articles + mise à jour stock</div>
+      <div style="padding:8px 0">🏠 <b style="color:var(--text)">Installation existante</b> → audit + mise aux normes</div>
+    </div>
+  </div>
 </div>
 
 <!-- PAGE DEVIS -->
@@ -355,12 +405,34 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   </div>
 </div>
 
+
+<!-- ═══════ PAGE REMISES ═══════ -->
+<div class="page" id="p-rem">
+  <div class="ptitle">Remises & <span>Prix Revient</span></div>
+  <div class="psub">// SIDV/SISCA · WENDEL · CALCUL INTELLIGENT</div>
+  <div class="card">
+    <div class="shead"><div class="stitle">🏪 SIDV — Groupe Sisca</div><span class="badge bb">MÉRIGNAC + V.D'ORNON</span></div>
+    <div id="sidvRem"></div>
+  </div>
+  <div class="card">
+    <div class="shead"><div class="stitle">🏪 Wendel Matériaux</div><span class="badge bo">MÉRIGNAC</span></div>
+    <div id="wendelRem"></div>
+  </div>
+  <div class="card">
+    <div class="shead"><div class="stitle">🧮 Calculateur prix revient IA</div></div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:10px;line-height:1.6">Décris l'installation → coût réel avec tes remises + prix de vente conseillé.</div>
+    <textarea class="dta" id="prInput" placeholder="Ex: chauffe-eau Atlantique 200L + groupe sécu 20/27 + siphon&#10;Ex: 6 vannes 20/27 + 10 coudes sertir 16 + 5m tube cuivre..."></textarea>
+    <button class="btn btn-b" style="width:100%;justify-content:center;margin-top:10px" onclick="calcPR()">🧮 CALCULER PRIX DE REVIENT</button>
+    <div id="prResult"></div>
+  </div>
+</div>
+
 <nav class="navbar">
   <button class="nb on" onclick="showPage('chat',this)"><span class="nb-icon">🤖</span><span class="nb-lbl">ASSISTANT</span></button>
   <button class="nb" onclick="showPage('stock',this)"><span class="nb-icon">📦</span><span class="nb-lbl">STOCK</span></button>
+  <button class="nb" onclick="showPage('diag',this)"><span class="nb-icon">📷</span><span class="nb-lbl">DIAGNOSTIC</span></button>
   <button class="nb" onclick="showPage('devis',this)"><span class="nb-icon">📝</span><span class="nb-lbl">DEVIS</span></button>
-  <button class="nb" onclick="showPage('fournisseurs',this)"><span class="nb-icon">🏪</span><span class="nb-lbl">REMISES</span></button>
-  <button class="nb" onclick="showPage('metals',this)"><span class="nb-icon">🪙</span><span class="nb-lbl">MÉTAUX</span></button>
+  <button class="nb" onclick="showPage('rem',this)"><span class="nb-icon">🏪</span><span class="nb-lbl">REMISES</span></button>
 </nav>
 
 <!-- SETTINGS -->
@@ -372,11 +444,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
       <div><div style="font-size:13px;font-weight:700;">ABCC33</div><div style="font-family:var(--mono);font-size:9px;color:var(--muted2);">SIRET 498 201 292 00030</div></div>
     </div>
     <label>MON PRÉNOM</label><input type="text" id="sName" placeholder="Amar" oninput="saveSettings()">
-    <label>CLÉ API IA</label><input type="password" id="sApiKey" placeholder="sk-ant-api03-... ou sk-..." oninput="saveSettings()">
+    <label>CLÉ API IA</label><input type="password" id="sApiKey" placeholder="Clé API configurée" oninput="saveSettings()">
     <label>MOTEUR IA</label>
     <select id="sApiType" onchange="saveSettings()">
-      <option value="claude">Anthropic Claude (recommandé)</option>
-      <option value="openai">OpenAI GPT-4o</option>
+      <option value="claude">Anthropic Claude</option>
+      <option value="openai" selected>OpenAI GPT-4o ✓</option>
     </select>
     <div class="div"></div>
     <div class="brow">
@@ -474,7 +546,11 @@ const DEFAULT_STOCK=[
 
 // ═══════════════════════ STATE ═══════════════════════
 let stock=JSON.parse(localStorage.getItem('at_stock')||'null')||DEFAULT_STOCK;
-let settings=JSON.parse(localStorage.getItem('at_settings')||'{}');
+let settings=JSON.parse(localStorage.getItem('at_settings')||'null')||{
+  name:'Amar',
+  apiKey:'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',
+  apiType:'openai'
+};
 let meta=JSON.parse(localStorage.getItem('at_meta')||'null')||{
   name:'ABCC33',
   siret:'498 201 292 00030',
@@ -496,6 +572,17 @@ let isRec=false;
 
 function saveStock(){localStorage.setItem('at_stock',JSON.stringify(stock));}
 function saveSettings(){
+  const newKey = document.getElementById('sApiKey')?.value||'';
+  settings={
+    name:document.getElementById('sName')?.value||settings.name||'Amar',
+    apiKey: newKey || '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',
+    apiType:document.getElementById('sApiType')?.value||settings.apiType||'openai'
+  };
+  localStorage.setItem('at_settings_v2',JSON.stringify(settings));
+  const g=document.getElementById('greetName');
+  if(g) g.textContent=settings.name||'Amar';
+  toast('Réglages sauvegardés ✓','ok');
+
   settings={
     name:document.getElementById('sName')?.value||settings.name||'Amar',
     apiKey:document.getElementById('sApiKey')?.value||settings.apiKey||'',
@@ -849,7 +936,7 @@ function renderMetals(){
 // ═══════════════════════ DATA ═══════════════════════
 function logout(){
   if(confirm('Se déconnecter de AmarTech ?')){
-    sessionStorage.removeItem('abcc33_auth');
+    sessionStorage.removeItem('at_auth');
     window.location.href='index.html';
   }
 }
@@ -867,6 +954,142 @@ function importStock(e){
 }
 function clearStock(){stock=[];saveStock();renderStock();toast('Stock vidé','warn');}
 
+
+// ════════════════════════════════════════════
+// DIAGNOSTIC PHOTO (GPT-4o Vision)
+// ════════════════════════════════════════════
+let lastDiagB64 = null;
+
+async function analyzeDiag(event) {
+  const file = event.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    const b64 = ev.target.result;
+    lastDiagB64 = b64;
+    const preview = document.getElementById('diagPreview');
+    const tip = document.getElementById('photoTip');
+    const result = document.getElementById('diagResult');
+    if(preview) { preview.src=b64; preview.style.display='block'; }
+    if(tip) tip.style.display='none';
+    if(result) {
+      result.style.display='block';
+      result.innerHTML='<div style="display:flex;align-items:center;gap:8px;color:var(--muted2)"><div class="dots"><span></span><span></span><span></span></div>&nbsp; Analyse GPT-4o Vision en cours...</div>';
+    }
+    try {
+      const key = settings.apiKey || OPENAI_KEY;
+      const r = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+        body: JSON.stringify({
+          model:'gpt-4o',
+          max_tokens:800,
+          messages:[{
+            role:'user',
+            content:[
+              {type:'image_url', image_url:{url:b64, detail:'high'}},
+              {type:'text', text:`Tu es expert plombier-chauffagiste. Analyse cette image et fournis:
+1. 🔍 DIAGNOSTIC: Ce que tu vois et le problème détecté
+2. 🔩 PIÈCES NÉCESSAIRES: liste avec références et prix 2026 (région Bordeaux)
+3. 📋 PROCÉDURE: étapes de réparation/installation
+4. ⏱️ TEMPS ESTIMÉ: durée de l'intervention
+5. ⚠️ SÉCURITÉ: alertes si risque (gaz, pression, électricité)
+Sois précis, pratique et concis.`}
+            ]
+          }]
+        })
+      });
+      if(!r.ok) throw new Error('API error');
+      const data = await r.json();
+      const resp = data.choices[0].message.content;
+      if(result) result.innerHTML = '<div style="font-family:var(--mono);font-size:10px;letter-spacing:0.15em;color:var(--blue2);margin-bottom:10px">🔍 RÉSULTAT DIAGNOSTIC IA</div><div style="font-size:13px;line-height:1.75">' + resp.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b style=\"color:var(--blue2)\">$1</b>') + '</div>';
+      const askBtn = document.getElementById('diagAskBtn');
+      if(askBtn) askBtn.disabled = false;
+      toast('Diagnostic terminé ✓','ok');
+    } catch(e) {
+      if(result) result.innerHTML = '❌ Erreur analyse — vérifie ta connexion';
+      toast('Erreur analyse photo','err');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function askAboutDiag() {
+  if(!lastDiagB64) return;
+  const q = prompt('Ta question sur cette photo ?');
+  if(!q) return;
+  // Switch to chat tab
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('p-chat').classList.add('on');
+  document.querySelector('.nb').classList.add('on');
+  document.getElementById('chatInput').value = q;
+  sendChat();
+}
+
+
+// ════════════════════════════════════════════
+// REMISES FOURNISSEURS
+// ════════════════════════════════════════════
+const CATS_R = [
+  {key:'cuivre',    label:'Tube & raccords cuivre'},
+  {key:'sertir',    label:'Raccords à sertir (laiton)'},
+  {key:'chauffage', label:'Chauffage / Chauffe-eau / BAC'},
+  {key:'robinetterie', label:'Robinetterie / Vannes'},
+  {key:'divers',    label:'Divers / Consommables'},
+];
+
+function renderRem() {
+  ['sidv','wendel'].forEach(sup => {
+    const cont = document.getElementById(sup+'Rem');
+    if(!cont) return;
+    cont.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:12px;color:var(--muted2)">Remise moyenne</span><span class="badge bg" id="'+sup+'Badge">0%</span></div>' +
+      CATS_R.map(c => `<div style="display:grid;grid-template-columns:1fr 68px;gap:8px;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--muted2)">${c.label}</span>
+        <input class="ri" type="number" min="0" max="90" value="${remises[sup][c.key]||0}" oninput="updR('${sup}','${c.key}',this.value)">
+      </div>`).join('');
+    const avg = Math.round(Object.values(remises[sup]).reduce((a,b)=>a+b,0) / CATS_R.length);
+    const badge = document.getElementById(sup+'Badge');
+    if(badge) badge.textContent = 'moy. '+avg+'%';
+  });
+}
+
+function updR(sup, cat, val) {
+  remises[sup][cat] = parseFloat(val)||0;
+  localStorage.setItem('at_rem', JSON.stringify(remises));
+  renderRem();
+}
+
+async function calcPR() {
+  const inp = document.getElementById('prInput').value.trim();
+  if(!inp) { toast("Décris l'installation",'warn'); return; }
+  toast('Calcul avec tes remises...','ok');
+  try {
+    const key = settings.apiKey || OPENAI_KEY;
+    const prompt = `Expert chiffrage plomberie-chauffage, région Bordeaux (2026).
+Prestation: ${inp}
+Remises SIDV: cuivre ${remises.sidv.cuivre}%, sertir ${remises.sidv.sertir}%, chauffage ${remises.sidv.chauffage}%, robinetterie ${remises.sidv.robinetterie}%
+Remises Wendel: cuivre ${remises.wendel.cuivre}%, robinetterie ${remises.wendel.robinetterie}%
+
+Calcule avec tableau précis:
+1. MATÉRIAUX: article · prix catalogue · remise % · prix après remise · total
+2. MAIN D'ŒUVRE: heures × 45€/h (tarif artisan Bordeaux 2026)
+3. TOTAL PRIX DE REVIENT
+4. MARGE 35% recommandée
+5. PRIX HT À FACTURER
+6. TVA 10% → TOTAL TTC`;
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body: JSON.stringify({model:'gpt-4o',max_tokens:900,messages:[{role:'user',content:prompt}]})
+    });
+    const data = await r.json();
+    const resp = data.choices[0].message.content;
+    const prResult = document.getElementById('prResult');
+    if(prResult) prResult.innerHTML = '<div style="background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.18);border-radius:10px;padding:13px;margin-top:12px"><div style="font-family:var(--mono);font-size:9px;letter-spacing:0.2em;color:var(--green);margin-bottom:10px">💡 RÉSULTAT CALCUL</div><div style="font-size:13px;line-height:1.8">'+resp.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b style=\"color:var(--green)\">$1</b>')+'</div></div>';
+    toast('Calcul terminé ✓','ok');
+  } catch(e) { toast('Erreur calcul','err'); }
+}
+
 // ═══════════════════════ TOAST ═══════════════════════
 function toast(msg,type='ok'){
   const el=document.getElementById('toast');
@@ -878,7 +1101,7 @@ function toast(msg,type='ok'){
 // ═══════════════════════ INIT ═══════════════════════
 window.addEventListener('DOMContentLoaded',()=>{
   // AUTH GUARD
-  if(!sessionStorage.getItem('abcc33_auth')) {
+  if(!sessionStorage.getItem('at_auth')) {
     window.location.href='index.html';
     return;
   }
@@ -903,10 +1126,23 @@ window.addEventListener('DOMContentLoaded',()=>{
 
   addLigne();addLigne();addLigne();
 
-  if(!settings.apiKey)setTimeout(()=>toast('Ouvre ⚙️ pour ajouter ta clé API IA','warn'),1800);
+  // API key pre-configured
+  // Restore remises
+  const savedRem = localStorage.getItem('at_rem') || localStorage.getItem('at_remises');
+  if(savedRem) remises = JSON.parse(savedRem);
+  
   const alerts=stock.filter(s=>s.qty===0||s.qty<=s.min);
   if(alerts.length)setTimeout(()=>toast(`⚠️ ${alerts.length} article(s) en alerte stock — onglet 📦`,'warn'),3000);
 });
+</script>
+
+<script>
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', {scope: './'})
+      .catch(e => console.log('SW:', e));
+  });
+}
 </script>
 </body>
 </html>
