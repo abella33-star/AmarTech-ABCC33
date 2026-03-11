@@ -306,10 +306,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
       <div class="trow main"><span>TOTAL TTC</span><span id="tTTC">0,00 €</span></div>
     </div>
     <div class="div"></div>
+    <div class="dsep">✍️ SIGNATURE CLIENT (optionnelle)</div>
+    <div style="margin-bottom:14px">
+      <canvas id="sigCanvas" width="600" height="100" style="border:1px solid var(--border);border-radius:8px;background:#fff;touch-action:none;display:block;width:100%;cursor:crosshair"></canvas>
+      <button class="btn btn-g" style="font-size:10px;padding:5px 12px;margin-top:6px" onclick="clearSig()">✕ EFFACER SIGNATURE</button>
+    </div>
+    <div class="div"></div>
     <div class="brow">
       <button class="btn btn-gn" style="flex:1;justify-content:center" onclick="downloadDevis()">📄 PDF / IMPRIMER</button>
       <button class="btn btn-b" style="flex:1;justify-content:center" onclick="emailDevis()">📧 ENVOYER EMAIL</button>
     </div>
+  </div>
+  <div class="card">
+    <div class="chead"><div class="ctitle">📋 Historique devis</div><button class="btn btn-g" style="font-size:10px;padding:6px 11px" onclick="localStorage.removeItem('at_devis_hist');renderDevisHistory()">EFFACER</button></div>
+    <div id="devisHistory"><div style="text-align:center;padding:16px;color:var(--muted);font-size:12px;font-family:var(--mono)">Aucun devis généré</div></div>
   </div>
 </div>
 
@@ -523,6 +533,7 @@ function showPage(name,btn){
   if(name==='stock')renderStock();
   if(name==='metals')renderMetals();
   if(name==='fournisseurs')renderFournisseurs();
+  if(name==='devis')renderDevisHistory();
   window.scrollTo(0,0);
 }
 
@@ -637,11 +648,12 @@ async function sendChat(){
   try{
     const resp=await callAI(chatHistory.slice(-8));
     document.getElementById(tid)?.remove();
-    const rx=/STOCK_UPDATE:(\d+):(\d+)/g;let m;
+    const rx=/STOCK_UPDATE:(\d+):(\d+)/g;let m;let stockChanged=false;
     while((m=rx.exec(resp))!==null){
       const item=stock.find(s=>s.id===parseInt(m[1]));
-      if(item){item.qty=Math.max(0,item.qty-parseInt(m[2]));saveStock();}
+      if(item){item.qty=Math.max(0,item.qty-parseInt(m[2]));saveStock();stockChanged=true;}
     }
+    if(stockChanged)renderStock();
     const clean=resp.replace(/STOCK_UPDATE:\d+:\d+/g,'').trim();
     addMsg(clean,'ai');
     chatHistory.push({role:'assistant',content:resp});
@@ -791,9 +803,11 @@ function buildHTML(){
   const cAddr=document.getElementById('dClientAddr').value||'';
   const cPhone=document.getElementById('dClientPhone').value||'';
   const desc=document.getElementById('dDesc').value||'';
+  const sigImg=getSig();
   const ht=lignes.reduce((s,l)=>s+(l.qty||0)*(l.pu||0),0);
   const tva=ht*.10;const ttc=ht+tva;
-  const num='DEV-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*999)+1).padStart(3,'0');
+  const cnt=(parseInt(localStorage.getItem('at_devis_cnt')||'0')+1);localStorage.setItem('at_devis_cnt',cnt);
+  const num='DEV-'+new Date().getFullYear()+'-'+String(cnt).padStart(3,'0');
   const date=new Date().toLocaleDateString('fr-FR');
   const validite=new Date(Date.now()+30*86400000).toLocaleDateString('fr-FR');
   return {num,html:`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Devis ${num}</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;font-size:13px;color:#111;padding:28px;background:#fff;}.hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;padding-bottom:16px;border-bottom:2.5px solid #1a3a6b;}.cn{font-size:19px;font-weight:800;color:#1a3a6b;margin-bottom:4px;}.ci{font-size:11px;color:#555;line-height:1.75;}.dt h1{font-size:28px;color:#1a3a6b;font-weight:800;text-align:right;}.dt .nm{font-size:12px;color:#666;text-align:right;margin-top:3px;}${logoData?'.lg{max-height:55px;max-width:110px;object-fit:contain;margin-bottom:7px;}':''}.cli{background:#f0f4f8;border-radius:8px;padding:14px;margin-bottom:18px;}.cll{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:5px;}.cln{font-size:14px;font-weight:700;}.cla{font-size:11px;color:#555;margin-top:2px;line-height:1.7;}.obj{background:#f9f9f9;border-left:3px solid #1a3a6b;padding:11px 14px;margin-bottom:16px;font-size:12px;line-height:1.6;}.val{background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:8px 12px;font-size:11px;color:#856404;margin-bottom:16px;}table{width:100%;border-collapse:collapse;margin-bottom:16px;}thead{background:#1a3a6b;color:#fff;}th{padding:9px 11px;font-size:11px;text-align:left;letter-spacing:.05em;}th:nth-child(2),th:nth-child(3),th:nth-child(4){text-align:right;}tbody tr{border-bottom:1px solid #eee;}tbody tr:nth-child(even){background:#f9f9f9;}td{padding:9px 11px;font-size:12px;}td:nth-child(2),td:nth-child(3),td:nth-child(4){text-align:right;}.tots{display:flex;justify-content:flex-end;margin-bottom:20px;}.tb{width:245px;}.tr{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #eee;}.tr.main{font-size:15px;font-weight:800;color:#1a3a6b;border-bottom:none;border-top:2px solid #1a3a6b;padding-top:9px;margin-top:4px;}.sign{display:flex;justify-content:space-between;margin-top:22px;}.sb{border:1px solid #ccc;border-radius:6px;padding:12px;width:45%;font-size:11px;color:#666;}.sb-h{font-weight:700;margin-bottom:6px;color:#333;}.sp{height:40px;}.ft{margin-top:22px;padding-top:12px;border-top:1px solid #ddd;font-size:10px;color:#888;text-align:center;line-height:1.75;}@media print{body{padding:10px;}}</style></head><body>
@@ -803,7 +817,7 @@ ${desc?`<div class="obj"><strong>Objet :</strong> ${desc}</div>`:''}
 <div class="val">📅 Devis valable jusqu'au <strong>${validite}</strong></div>
 <table><thead><tr><th>Désignation</th><th>Qté</th><th>P.U. HT</th><th>Total HT</th></tr></thead><tbody>${lignes.map(l=>`<tr><td>${l.desc}</td><td>${l.qty}</td><td>${(l.pu||0).toFixed(2)} €</td><td>${((l.qty||0)*(l.pu||0)).toFixed(2)} €</td></tr>`).join('')}</tbody></table>
 <div class="tots"><div class="tb"><div class="tr"><span>Sous-total HT</span><span>${ht.toFixed(2)} €</span></div><div class="tr"><span>TVA 10%</span><span>${tva.toFixed(2)} €</span></div><div class="tr main"><span>TOTAL TTC</span><span>${ttc.toFixed(2)} €</span></div></div></div>
-<div class="sign"><div class="sb"><div class="sb-h">Le prestataire</div><div>${meta.name||''}</div><div class="sp"></div><div style="font-size:10px;color:#aaa">Signature</div></div><div class="sb"><div class="sb-h">Bon pour accord</div><div>${client}</div><div class="sp"></div><div style="font-size:10px;color:#aaa">Date &amp; Signature</div></div></div>
+<div class="sign"><div class="sb"><div class="sb-h">Le prestataire</div><div>${meta.name||''}</div><div class="sp"></div><div style="font-size:10px;color:#aaa">Signature</div></div><div class="sb"><div class="sb-h">Bon pour accord — ${client}</div>${sigImg?`<img src="${sigImg}" style="max-width:100%;height:60px;object-fit:contain;margin:6px 0;">`:` <div class="sp"></div>`}<div style="font-size:10px;color:#aaa">Date &amp; Signature client</div></div></div>
 <div class="ft">${meta.name||''} — SIRET: ${meta.siret||''} ${meta.tva?'&nbsp;|&nbsp; TVA: '+meta.tva:''}<br>${meta.addr||''}<br>Travaux d'installation d'équipements thermiques et de climatisation<br><small>Document généré par AmarTech</small></div>
 </body></html>`};
 }
@@ -811,17 +825,19 @@ ${desc?`<div class="obj"><strong>Objet :</strong> ${desc}</div>`:''}
 function downloadDevis(){
   if(!lignes.length){toast('Ajoute au moins une ligne','warn');return;}
   const{num,html}=buildHTML();
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=`${num}_${(document.getElementById('dClient').value||'client').replace(/\s+/g,'_')}.html`;
-  a.click();URL.revokeObjectURL(url);
-  toast('Fichier téléchargé — ouvre-le et fais Imprimer → PDF ✓','ok');
+  saveDevisHistory(num);
+  const w=window.open('','_blank');
+  if(!w){toast('Autorise les popups pour imprimer','warn');return;}
+  w.document.write(html);w.document.close();w.focus();
+  setTimeout(()=>{w.print();},500);
+  toast('Fenêtre impression ouverte — choisis PDF ✓','ok');
+  renderDevisHistory();
 }
 
 function emailDevis(){
   if(!lignes.length){toast('Ajoute au moins une ligne','warn');return;}
   const{num,html}=buildHTML();
+  saveDevisHistory(num);renderDevisHistory();
   const blob=new Blob([html],{type:'text/html'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -834,6 +850,42 @@ function emailDevis(){
     window.location.href=`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     toast('Ouvre ton email et attache le fichier téléchargé ✓','ok');
   },600);
+}
+
+// ═══════════════════════ HISTORIQUE DEVIS ═══════════════════════
+function saveDevisHistory(num){
+  const client=document.getElementById('dClient').value||'Client';
+  const ttc=lignes.reduce((s,l)=>s+(l.qty||0)*(l.pu||0),0)*1.10;
+  const hist=JSON.parse(localStorage.getItem('at_devis_hist')||'[]');
+  hist.unshift({num,client,ttc:ttc.toFixed(2),date:new Date().toLocaleDateString('fr-FR')});
+  if(hist.length>30)hist.pop();
+  localStorage.setItem('at_devis_hist',JSON.stringify(hist));
+}
+function renderDevisHistory(){
+  const el=document.getElementById('devisHistory');if(!el)return;
+  const hist=JSON.parse(localStorage.getItem('at_devis_hist')||'[]');
+  if(!hist.length){el.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px;font-family:var(--mono)">Aucun devis généré</div>';return;}
+  el.innerHTML=hist.map(h=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-family:var(--mono);font-size:12px;color:var(--blue2)">${h.num}</div><div style="font-size:11px;color:var(--muted2)">${h.client} · ${h.date}</div></div><span style="font-family:var(--mono);font-weight:700;color:var(--green)">${parseFloat(h.ttc).toFixed(2)} € TTC</span></div>`).join('');
+}
+
+// ═══════════════════════ SIGNATURE ═══════════════════════
+let _sigDrawing=false,_sigCtx=null;
+function initSig(){
+  const c=document.getElementById('sigCanvas');if(!c)return;
+  _sigCtx=c.getContext('2d');_sigCtx.strokeStyle='#1a3a6b';_sigCtx.lineWidth=2.5;_sigCtx.lineCap='round';_sigCtx.lineJoin='round';
+  const pos=e=>{const r=c.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(c.width/r.width),y:(t.clientY-r.top)*(c.height/r.height)};};
+  c.addEventListener('mousedown',e=>{_sigDrawing=true;const p=pos(e);_sigCtx.beginPath();_sigCtx.moveTo(p.x,p.y);});
+  c.addEventListener('mousemove',e=>{if(!_sigDrawing)return;const p=pos(e);_sigCtx.lineTo(p.x,p.y);_sigCtx.stroke();});
+  c.addEventListener('mouseup',()=>_sigDrawing=false);c.addEventListener('mouseleave',()=>_sigDrawing=false);
+  c.addEventListener('touchstart',e=>{e.preventDefault();_sigDrawing=true;const p=pos(e);_sigCtx.beginPath();_sigCtx.moveTo(p.x,p.y);},{passive:false});
+  c.addEventListener('touchmove',e=>{e.preventDefault();if(!_sigDrawing)return;const p=pos(e);_sigCtx.lineTo(p.x,p.y);_sigCtx.stroke();},{passive:false});
+  c.addEventListener('touchend',()=>_sigDrawing=false);
+}
+function clearSig(){if(_sigCtx){const c=document.getElementById('sigCanvas');_sigCtx.clearRect(0,0,c.width,c.height);}}
+function getSig(){
+  const c=document.getElementById('sigCanvas');if(!c)return'';
+  const b=document.createElement('canvas');b.width=c.width;b.height=c.height;
+  return c.toDataURL()===b.toDataURL()?'':c.toDataURL();
 }
 
 // ═══════════════════════ FOURNISSEURS ═══════════════════════
@@ -957,8 +1009,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   const pt=document.querySelector('#p-chat .ptitle');
   if(pt){pt.innerHTML=`${g} <span id="greetName"></span> 👋`;document.getElementById('greetName').textContent=nom;}
 
-  renderStock();renderFournisseurs();
+  renderStock();renderFournisseurs();renderDevisHistory();
   addLigne();addLigne();addLigne();
+  initSig();
 
   if(!settings.apiKey)setTimeout(()=>toast('Ouvre ⚙️ pour ajouter ta clé API IA','warn'),1800);
   const alerts=stock.filter(s=>s.qty===0||s.qty<=s.min);
