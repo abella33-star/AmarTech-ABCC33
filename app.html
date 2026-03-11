@@ -477,6 +477,7 @@ const DEFAULT_STOCK=[
 // ═══════════════════════ STATE ═══════════════════════
 let stock=JSON.parse(localStorage.getItem('at_stock')||'null')||DEFAULT_STOCK;
 let settings=JSON.parse(localStorage.getItem('at_settings')||'{}');
+if(!settings.apiType)settings.apiType='openai';
 let meta=JSON.parse(localStorage.getItem('at_meta')||'null')||{
   name:'ABCC33',
   siret:'498 201 292 00030',
@@ -848,7 +849,13 @@ function renderRBlock(cid,sup,bid){
   const avg=Math.round(Object.values(remises[sup]).reduce((a,b)=>a+b,0)/CATS_R.length);
   document.getElementById(bid).textContent='moy. '+avg+'%';
 }
-function updateR(sup,cat,val){remises[sup][cat]=parseFloat(val)||0;saveRemises();renderFournisseurs();}
+function updateR(sup,cat,val){
+  remises[sup][cat]=parseFloat(val)||0;
+  saveRemises();
+  const bid=sup==='sidv'?'sidvBadge':'wendelBadge';
+  const avg=Math.round(Object.values(remises[sup]).reduce((a,b)=>a+b,0)/CATS_R.length);
+  document.getElementById(bid).textContent='moy. '+avg+'%';
+}
 
 async function calcPR(){
   const inp=document.getElementById('prInput').value.trim();
